@@ -60,6 +60,7 @@ interface ChatState {
   // Actions
   loadSessions: () => Promise<void>;
   switchSession: (key: string) => void;
+  newSession: () => void;
   loadHistory: () => Promise<void>;
   sendMessage: (text: string) => Promise<void>;
   handleChatEvent: (event: Record<string, unknown>) => void;
@@ -127,6 +128,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
     // Load history for new session
     get().loadHistory();
+  },
+
+  // ── New session ──
+
+  newSession: () => {
+    // Generate a new unique session key and switch to it
+    const newKey = `session-${Date.now()}`;
+    set({
+      currentSessionKey: newKey,
+      messages: [],
+      streamingText: '',
+      streamingMessage: null,
+      activeRunId: null,
+      error: null,
+    });
+    // Reload sessions list to include the new one after first message
+    get().loadSessions();
   },
 
   // ── Load chat history ──

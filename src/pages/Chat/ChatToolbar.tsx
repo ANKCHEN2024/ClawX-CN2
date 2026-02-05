@@ -1,8 +1,9 @@
 /**
  * Chat Toolbar
- * Session selector, refresh, and thinking toggle controls.
+ * Session selector, new session, refresh, and thinking toggle.
+ * Rendered in the Header when on the Chat page.
  */
-import { RefreshCw, Brain, ChevronDown } from 'lucide-react';
+import { RefreshCw, Brain, ChevronDown, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChatStore } from '@/stores/chat';
 import { cn } from '@/lib/utils';
@@ -11,6 +12,7 @@ export function ChatToolbar() {
   const sessions = useChatStore((s) => s.sessions);
   const currentSessionKey = useChatStore((s) => s.currentSessionKey);
   const switchSession = useChatStore((s) => s.switchSession);
+  const newSession = useChatStore((s) => s.newSession);
   const refresh = useChatStore((s) => s.refresh);
   const loading = useChatStore((s) => s.loading);
   const showThinking = useChatStore((s) => s.showThinking);
@@ -50,6 +52,17 @@ export function ChatToolbar() {
         </select>
         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
       </div>
+
+      {/* New Session */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        onClick={newSession}
+        title="New session"
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
 
       {/* Refresh */}
       <Button

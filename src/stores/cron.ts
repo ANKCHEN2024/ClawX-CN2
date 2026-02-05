@@ -20,7 +20,7 @@ interface CronState {
   setJobs: (jobs: CronJob[]) => void;
 }
 
-export const useCronStore = create<CronState>((set, get) => ({
+export const useCronStore = create<CronState>((set) => ({
   jobs: [],
   loading: false,
   error: null,

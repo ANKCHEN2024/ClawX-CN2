@@ -11,8 +11,6 @@ import {
   Clock,
   Settings,
   Plus,
-  RefreshCw,
-  ExternalLink,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +20,6 @@ import { useGatewayStore } from '@/stores/gateway';
 import { useChannelsStore } from '@/stores/channels';
 import { useSkillsStore } from '@/stores/skills';
 import { StatusBadge } from '@/components/common/StatusBadge';
-import { formatRelativeTime } from '@/lib/utils';
 
 export function Dashboard() {
   const gatewayStatus = useGatewayStore((state) => state.status);

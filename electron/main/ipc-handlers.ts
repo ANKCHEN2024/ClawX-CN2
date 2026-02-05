@@ -37,6 +37,11 @@ function registerGatewayHandlers(
     return gatewayManager.getStatus();
   });
   
+  // Check if Gateway is connected
+  ipcMain.handle('gateway:isConnected', () => {
+    return gatewayManager.isConnected();
+  });
+  
   // Start Gateway
   ipcMain.handle('gateway:start', async () => {
     try {
@@ -60,8 +65,7 @@ function registerGatewayHandlers(
   // Restart Gateway
   ipcMain.handle('gateway:restart', async () => {
     try {
-      await gatewayManager.stop();
-      await gatewayManager.start();
+      await gatewayManager.restart();
       return { success: true };
     } catch (error) {
       return { success: false, error: String(error) };
@@ -69,26 +73,66 @@ function registerGatewayHandlers(
   });
   
   // Gateway RPC call
-  ipcMain.handle('gateway:rpc', async (_, method: string, params?: unknown) => {
+  ipcMain.handle('gateway:rpc', async (_, method: string, params?: unknown, timeoutMs?: number) => {
     try {
-      const result = await gatewayManager.rpc(method, params);
+      const result = await gatewayManager.rpc(method, params, timeoutMs);
       return { success: true, result };
     } catch (error) {
       return { success: false, error: String(error) };
     }
   });
   
-  // Forward Gateway status events to renderer
+  // Health check
+  ipcMain.handle('gateway:health', async () => {
+    try {
+      const health = await gatewayManager.checkHealth();
+      return { success: true, ...health };
+    } catch (error) {
+      return { success: false, ok: false, error: String(error) };
+    }
+  });
+  
+  // Forward Gateway events to renderer
   gatewayManager.on('status', (status) => {
-    mainWindow.webContents.send('gateway:status-changed', status);
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('gateway:status-changed', status);
+    }
   });
   
   gatewayManager.on('message', (message) => {
-    mainWindow.webContents.send('gateway:message', message);
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('gateway:message', message);
+    }
+  });
+  
+  gatewayManager.on('notification', (notification) => {
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('gateway:notification', notification);
+    }
+  });
+  
+  gatewayManager.on('channel:status', (data) => {
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('gateway:channel-status', data);
+    }
+  });
+  
+  gatewayManager.on('chat:message', (data) => {
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('gateway:chat-message', data);
+    }
   });
   
   gatewayManager.on('exit', (code) => {
-    mainWindow.webContents.send('gateway:exit', code);
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('gateway:exit', code);
+    }
+  });
+  
+  gatewayManager.on('error', (error) => {
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('gateway:error', error.message);
+    }
   });
 }
 

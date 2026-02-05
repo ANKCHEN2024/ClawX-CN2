@@ -3,7 +3,7 @@
  * Navigation sidebar with menu items
  */
 import { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   Home,
   MessageSquare,
@@ -62,7 +62,6 @@ function NavItem({ to, icon, label, badge, collapsed }: NavItemProps) {
 }
 
 export function Sidebar() {
-  const location = useLocation();
   const sidebarCollapsed = useSettingsStore((state) => state.sidebarCollapsed);
   const setSidebarCollapsed = useSettingsStore((state) => state.setSidebarCollapsed);
   const devModeUnlocked = useSettingsStore((state) => state.devModeUnlocked);

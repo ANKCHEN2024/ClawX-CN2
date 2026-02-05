@@ -2,7 +2,7 @@
  * Gateway WebSocket Client
  * Provides a typed interface for Gateway RPC calls
  */
-import { GatewayManager } from './manager';
+import { GatewayManager, GatewayStatus } from './manager';
 
 /**
  * Channel types supported by OpenClaw
@@ -19,6 +19,7 @@ export interface Channel {
   status: 'connected' | 'disconnected' | 'connecting' | 'error';
   lastActivity?: string;
   error?: string;
+  config?: Record<string, unknown>;
 }
 
 /**
@@ -32,6 +33,20 @@ export interface Skill {
   category?: string;
   icon?: string;
   configurable?: boolean;
+  version?: string;
+  author?: string;
+}
+
+/**
+ * Skill bundle definition
+ */
+export interface SkillBundle {
+  id: string;
+  name: string;
+  description: string;
+  skills: string[];
+  icon?: string;
+  recommended?: boolean;
 }
 
 /**
@@ -44,6 +59,7 @@ export interface ChatMessage {
   timestamp: string;
   channel?: string;
   toolCalls?: ToolCall[];
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -55,6 +71,35 @@ export interface ToolCall {
   arguments: Record<string, unknown>;
   result?: unknown;
   status: 'pending' | 'running' | 'completed' | 'error';
+  duration?: number;
+}
+
+/**
+ * Cron task definition
+ */
+export interface CronTask {
+  id: string;
+  name: string;
+  schedule: string;
+  command: string;
+  enabled: boolean;
+  lastRun?: string;
+  nextRun?: string;
+  status: 'idle' | 'running' | 'error';
+  error?: string;
+}
+
+/**
+ * Provider configuration
+ */
+export interface ProviderConfig {
+  id: string;
+  name: string;
+  type: 'openai' | 'anthropic' | 'ollama' | 'custom';
+  apiKey?: string;
+  baseUrl?: string;
+  model?: string;
+  enabled: boolean;
 }
 
 /**
@@ -63,6 +108,20 @@ export interface ToolCall {
  */
 export class GatewayClient {
   constructor(private manager: GatewayManager) {}
+  
+  /**
+   * Get current gateway status
+   */
+  getStatus(): GatewayStatus {
+    return this.manager.getStatus();
+  }
+  
+  /**
+   * Check if gateway is connected
+   */
+  isConnected(): boolean {
+    return this.manager.isConnected();
+  }
   
   // ==================== Channel Methods ====================
   
@@ -161,13 +220,80 @@ export class GatewayClient {
     return this.manager.rpc<void>('chat.clear');
   }
   
+  // ==================== Cron Methods ====================
+  
+  /**
+   * List all cron tasks
+   */
+  async listCronTasks(): Promise<CronTask[]> {
+    return this.manager.rpc<CronTask[]>('cron.list');
+  }
+  
+  /**
+   * Create a new cron task
+   */
+  async createCronTask(task: Omit<CronTask, 'id' | 'status'>): Promise<CronTask> {
+    return this.manager.rpc<CronTask>('cron.create', task);
+  }
+  
+  /**
+   * Update a cron task
+   */
+  async updateCronTask(taskId: string, updates: Partial<CronTask>): Promise<CronTask> {
+    return this.manager.rpc<CronTask>('cron.update', { taskId, ...updates });
+  }
+  
+  /**
+   * Delete a cron task
+   */
+  async deleteCronTask(taskId: string): Promise<void> {
+    return this.manager.rpc<void>('cron.delete', { taskId });
+  }
+  
+  /**
+   * Run a cron task immediately
+   */
+  async runCronTask(taskId: string): Promise<void> {
+    return this.manager.rpc<void>('cron.run', { taskId });
+  }
+  
+  // ==================== Provider Methods ====================
+  
+  /**
+   * List configured AI providers
+   */
+  async listProviders(): Promise<ProviderConfig[]> {
+    return this.manager.rpc<ProviderConfig[]>('providers.list');
+  }
+  
+  /**
+   * Add or update a provider
+   */
+  async setProvider(provider: ProviderConfig): Promise<void> {
+    return this.manager.rpc<void>('providers.set', provider);
+  }
+  
+  /**
+   * Remove a provider
+   */
+  async removeProvider(providerId: string): Promise<void> {
+    return this.manager.rpc<void>('providers.remove', { providerId });
+  }
+  
+  /**
+   * Test provider connection
+   */
+  async testProvider(providerId: string): Promise<{ success: boolean; error?: string }> {
+    return this.manager.rpc<{ success: boolean; error?: string }>('providers.test', { providerId });
+  }
+  
   // ==================== System Methods ====================
   
   /**
    * Get Gateway health status
    */
-  async getHealth(): Promise<{ status: string; uptime: number }> {
-    return this.manager.rpc<{ status: string; uptime: number }>('system.health');
+  async getHealth(): Promise<{ status: string; uptime: number; version?: string }> {
+    return this.manager.rpc<{ status: string; uptime: number; version?: string }>('system.health');
   }
   
   /**
@@ -182,5 +308,26 @@ export class GatewayClient {
    */
   async updateConfig(config: Record<string, unknown>): Promise<void> {
     return this.manager.rpc<void>('system.updateConfig', config);
+  }
+  
+  /**
+   * Get Gateway version info
+   */
+  async getVersion(): Promise<{ version: string; nodeVersion?: string; platform?: string }> {
+    return this.manager.rpc<{ version: string; nodeVersion?: string; platform?: string }>('system.version');
+  }
+  
+  /**
+   * Get available skill bundles
+   */
+  async getSkillBundles(): Promise<SkillBundle[]> {
+    return this.manager.rpc<SkillBundle[]>('skills.bundles');
+  }
+  
+  /**
+   * Install a skill bundle
+   */
+  async installBundle(bundleId: string): Promise<void> {
+    return this.manager.rpc<void>('skills.installBundle', { bundleId });
   }
 }

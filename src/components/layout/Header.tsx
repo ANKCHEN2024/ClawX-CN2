@@ -3,7 +3,7 @@
  * Top navigation bar with search and actions
  */
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Search, Bell, Moon, Sun, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,6 @@ const pageTitles: Record<string, string> = {
 
 export function Header() {
   const location = useLocation();
-  const navigate = useNavigate();
   const theme = useSettingsStore((state) => state.theme);
   const setTheme = useSettingsStore((state) => state.setTheme);
   

@@ -16,10 +16,12 @@ const electronAPI = {
       const validChannels = [
         // Gateway
         'gateway:status',
+        'gateway:isConnected',
         'gateway:start',
         'gateway:stop',
         'gateway:restart',
         'gateway:rpc',
+        'gateway:health',
         // Shell
         'shell:openExternal',
         'shell:showItemInFolder',
@@ -74,6 +76,9 @@ const electronAPI = {
       const validChannels = [
         'gateway:status-changed',
         'gateway:message',
+        'gateway:notification',
+        'gateway:channel-status',
+        'gateway:chat-message',
         'gateway:exit',
         'gateway:error',
         'navigate',
@@ -106,6 +111,9 @@ const electronAPI = {
       const validChannels = [
         'gateway:status-changed',
         'gateway:message',
+        'gateway:notification',
+        'gateway:channel-status',
+        'gateway:chat-message',
         'gateway:exit',
         'gateway:error',
         'navigate',

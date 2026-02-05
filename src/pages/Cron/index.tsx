@@ -2,7 +2,7 @@
  * Cron Page
  * Manage scheduled tasks
  */
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Plus, Clock, Play, Pause, Trash2, Edit, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
